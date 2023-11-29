@@ -10,19 +10,16 @@ LINE Bot + TypeScript + Firebase Functions のテンプレート
 
 ## デプロイ
 
-1.下記コマンドを実行
+実行環境
+
+```bash
+node 18
 ```
-npm install
+
+コマンド
+
+```bash
+firebase deploy
+or
+firebase deploy --only functions:lineBot
 ```
-
-2.プロジェクト作成
-Google Cloud Consoleにアクセスし、プロジェクトを作成する。
-
-URL: https://console.cloud.google.com/welcome/new
-
-そのプロジェクトで、Google Calendar APIを有効化する。
-
-
-3.認証情報の取得
-プロジェクトを選択したら、認証情報を生成し、OAuth 2.0 クライアントIDを作成する
-OAuth 2.0 クライアントIDをダウンロードして、後で使用するために保存
