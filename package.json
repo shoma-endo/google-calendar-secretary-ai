@@ -6,6 +6,7 @@
     "dev": "yarn build && firebase emulators:start --only functions",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
+    "local-start": "node dist/index.js",
     "logs": "firebase functions:log",
     "eslint": "eslint --ext \".ts\" . --fix",
     "prettier": "prettier --write .",
