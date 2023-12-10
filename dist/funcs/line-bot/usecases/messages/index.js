@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.messagesUsecase = void 0;
 const line_client_1 = require("~/clients/line.client");
-const util_1 = require("~/utils/util");
 const other_1 = require("~lineBot/notice-messages/other");
 const text_1 = require("./text");
 const messagesUsecase = async (event) => {
@@ -15,7 +14,6 @@ const messagesUsecase = async (event) => {
         }
     }
     catch (err) {
-        (0, util_1.errorLogger)(err);
         throw new Error('messages Usecase');
     }
 };

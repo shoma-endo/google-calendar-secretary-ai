@@ -1,7 +1,6 @@
 import { WebhookEvent } from '@line/bot-sdk'
 
 import { lineClient } from '~/clients/line.client'
-import { errorLogger } from '~/utils/util'
 import { msgError } from '~lineBot/notice-messages/other'
 
 import { followUsecase } from './follow'
@@ -16,9 +15,8 @@ export const usecases = async (event: WebhookEvent): Promise<void> => {
         return await messagesUsecase(event)
       default:
     }
-  } catch (err) {
+  } catch {
     lineClient.pushMessage(event.source.userId!, msgError).catch
-    errorLogger(err)
     throw new Error('usecases')
   }
 }

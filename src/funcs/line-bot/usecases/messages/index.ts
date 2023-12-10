@@ -1,7 +1,6 @@
 import { MessageEvent } from '@line/bot-sdk'
 
 import { lineClient } from '~/clients/line.client'
-import { errorLogger } from '~/utils/util'
 import { msgOther } from '~lineBot/notice-messages/other'
 
 import { messageTextUsecase } from './text'
@@ -14,8 +13,7 @@ export const messagesUsecase = async (event: MessageEvent): Promise<void> => {
       default:
         await lineClient.replyMessage(event.replyToken, msgOther)
     }
-  } catch (err) {
-    errorLogger(err)
+  } catch {
     throw new Error('messages Usecase')
   }
 }
