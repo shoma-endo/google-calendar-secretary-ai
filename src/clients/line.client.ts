@@ -6,7 +6,7 @@ export const lineMiddlewareConfig: MiddlewareConfig = {
   channelSecret: LINE_SECRET
 }
 
-export const lineConfig: ClientConfig = {
+export const lineConfig: ClientConfig & MiddlewareConfig = {
   ...lineMiddlewareConfig,
   channelAccessToken: LINE_ACCESS_TOKEN
 }
