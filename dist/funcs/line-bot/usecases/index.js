@@ -15,7 +15,7 @@ const usecases = async (event) => {
             default:
         }
     }
-    catch (err) {
+    catch {
         line_client_1.lineClient.pushMessage(event.source.userId, other_1.msgError).catch;
         throw new Error('usecases');
     }

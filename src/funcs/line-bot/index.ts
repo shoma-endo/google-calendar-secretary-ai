@@ -1,27 +1,26 @@
-import { MessageEvent, middleware } from '@line/bot-sdk'
+import { middleware } from '@line/bot-sdk'
 import express from 'express'
 
-import { lineClient, lineConfig } from '~/clients/line.client'
+import { lineMiddlewareConfig } from '~/clients/line.client'
+
+import { usecases } from './usecases'
 
 const app = express()
 
-app.post('/webhook', middleware(lineConfig), (req, res) => {
+app.post('/webhook', middleware(lineMiddlewareConfig), (req, res) => {
   Promise
-    .all(req.body.events.map(handleEvent))
-    .then((result) => res.json(result))
+    .all(req.body.events.map(usecases))
+    .then((result) => {
+      res.json(result)
+      res.status(200).end()
+    })
     .catch((err) => {
       console.error(err);
       res.status(500).end();
     });
 });
 
-const handleEvent = async (event: MessageEvent) => {
-	if (event.type !== 'message' || event.message.type !== 'text') {
-    return Promise.resolve(null);
-  }
-
-  return lineClient.replyMessage(event.replyToken, {
-    type: 'text',
-    text: event.message.text
-  });
-}
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Listening on port ${port}`); // eslint-disable-line no-console
+});
