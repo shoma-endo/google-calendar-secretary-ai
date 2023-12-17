@@ -13,7 +13,7 @@ const messagesUsecase = async (event) => {
                 await line_client_1.lineClient.replyMessage(event.replyToken, other_1.msgOther);
         }
     }
-    catch (err) {
+    catch {
         throw new Error('messages Usecase');
     }
 };
