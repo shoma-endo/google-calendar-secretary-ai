@@ -101,3 +101,7 @@ packages/migrations/assets/
 
 !**/**/.keep
 .vercel
+
+# Google credential file
+
+/credentials.json
