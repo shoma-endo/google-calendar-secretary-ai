@@ -1,9 +1,11 @@
-import { google, calendar_v3 } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
+import { google } from 'googleapis';
 import { GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_SECRET, APP_URL } from '../../utils/secrets'
-export const userTokens: { [userId: string]: any } = {}; // TODO: トークンの有効期限を追加したい
 
-const oauth2Client = new OAuth2Client(
+let userTokens: { [key: string]: any } = {}; // TODO: トークンの有効期限を追加したい
+
+const OAuth2 = google.auth.OAuth2;
+
+const oauth2Client = new OAuth2(
     GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_SECRET,
     APP_URL + "/callback"
@@ -18,10 +20,12 @@ async function saveUserTokens(req: any) {
   const code = req.query.code as string;
   const { tokens } = await oauth2Client.getToken(code);
 
-  // TODO: キー修正
-  const userId = 'some-unique-user-id';
-  userTokens[userId] = tokens;
+  userTokens = tokens;
   console.log(tokens);
 }
 
-export { oauth2Client, authUrl, saveUserTokens };
+async function deleteUserTokens(req: any) {
+  userTokens = {};
+}
+
+export { userTokens, oauth2Client, authUrl, saveUserTokens, deleteUserTokens };
