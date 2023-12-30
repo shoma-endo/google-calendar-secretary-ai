@@ -7,6 +7,7 @@ const bot_sdk_1 = require("@line/bot-sdk");
 const express_1 = __importDefault(require("express"));
 const line_client_1 = require("~/clients/line.client");
 const usecases_1 = require("./usecases");
+const calendars_1 = require("../calendars");
 const app = (0, express_1.default)();
 app.post('/webhook', (0, bot_sdk_1.middleware)(line_client_1.lineMiddlewareConfig), (req, res) => {
     Promise
@@ -19,6 +20,15 @@ app.post('/webhook', (0, bot_sdk_1.middleware)(line_client_1.lineMiddlewareConfi
         console.error(err);
         res.status(500).end();
     });
+});
+app.get('/callback', async (req, res) => {
+    try {
+        (0, calendars_1.saveUserTokens)(req);
+        res.send('認証が完了しました。LINEに戻ってください。');
+    }
+    catch (error) {
+        res.send('認証エラーが発生しました。再度ログインをし直してください。');
+    }
 });
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

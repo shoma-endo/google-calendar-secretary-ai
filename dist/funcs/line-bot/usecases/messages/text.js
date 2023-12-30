@@ -4,9 +4,14 @@ exports.messageTextUsecase = void 0;
 const line_client_1 = require("~/clients/line.client");
 const openai_client_1 = require("~/clients/openai.client");
 const line_util_1 = require("~/utils/line.util");
+const calendars_1 = require("../../../calendars");
 const messageTextUsecase = async (event) => {
     console.log(event.message);
     try {
+        if (Object.keys(calendars_1.userTokens).length === 0) {
+            await line_client_1.lineClient.replyMessage(event.replyToken, (0, line_util_1.makeReplyMessage)(calendars_1.authUrl));
+            return;
+        }
         const { text } = event.message;
         const response = await getOpenaiMessage(text);
         if (response === null) {

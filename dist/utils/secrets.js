@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OPENAI_API_KEY = exports.LINE_SECRET = exports.LINE_ACCESS_TOKEN = void 0;
+exports.GOOGLE_OAUTH_SECRET = exports.GOOGLE_OAUTH_CLIENT_ID = exports.OPENAI_API_KEY = exports.LINE_SECRET = exports.LINE_ACCESS_TOKEN = exports.APP_URL = void 0;
 require("dotenv/config");
+exports.APP_URL = process.env.APP_URL;
 exports.LINE_ACCESS_TOKEN = process.env.LINE_ACCESS_TOKEN;
 exports.LINE_SECRET = process.env.LINE_SECRET;
 exports.OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+exports.GOOGLE_OAUTH_CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
+exports.GOOGLE_OAUTH_SECRET = process.env.GOOGLE_OAUTH_SECRET;
