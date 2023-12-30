@@ -6,7 +6,6 @@ import { msgOther } from '~lineBot/notice-messages/other'
 import { messageTextUsecase } from './text'
 
 export const messagesUsecase = async (event: MessageEvent): Promise<void> => {
-  console.log(event.message.type); // eslint-disable-line no-console
   try {
     switch (event.message.type) {
       case 'text':
