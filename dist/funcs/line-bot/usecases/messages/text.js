@@ -9,7 +9,7 @@ const messageTextUsecase = async (event) => {
     console.log(event.message);
     try {
         const currentTime = new Date().getTime();
-        if (calendars_1.userTokens?.expiry_date <= currentTime)
+        if (typeof calendars_1.userTokens?.expiry_date === 'number' && calendars_1.userTokens?.expiry_date <= currentTime)
             calendars_1.deleteUserTokens;
         if (Object.keys(calendars_1.userTokens).length === 0) {
             await line_client_1.lineClient.replyMessage(event.replyToken, (0, line_util_1.makeReplyMessage)(calendars_1.authUrl));

@@ -5,7 +5,6 @@ const line_client_1 = require("~/clients/line.client");
 const other_1 = require("~lineBot/notice-messages/other");
 const text_1 = require("./text");
 const messagesUsecase = async (event) => {
-    console.log(event.message.type);
     try {
         switch (event.message.type) {
             case 'text':

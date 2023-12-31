@@ -10,7 +10,7 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 	try {
     const currentTime = new Date().getTime();
     // 有効期限のチェック
-    if (userTokens?.expiry_date <= currentTime) deleteUserTokens;
+    if (typeof userTokens?.expiry_date === 'number' && userTokens?.expiry_date <= currentTime) deleteUserTokens;
     // オブジェクトが空かチェック
     if (Object.keys(userTokens).length === 0) {
       // Google認証済みでなければLINEで認証URLを返答する

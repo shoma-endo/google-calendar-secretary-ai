@@ -23,7 +23,8 @@ app.post('/webhook', middleware(lineMiddlewareConfig), (req, res) => {
 
 app.get('/callback', async (req, res) => {
   try {
-    saveUserTokens(req);
+    const code = req.query.code as string;
+    saveUserTokens(code);
     res.send('認証が完了しました。LINEに戻ってください。');
   } catch (error) {
     res.send('認証エラーが発生しました。再度ログインをし直してください。');

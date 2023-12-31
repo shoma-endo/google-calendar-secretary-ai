@@ -23,7 +23,8 @@ app.post('/webhook', (0, bot_sdk_1.middleware)(line_client_1.lineMiddlewareConfi
 });
 app.get('/callback', async (req, res) => {
     try {
-        (0, calendars_1.saveUserTokens)(req);
+        const code = req.query.code;
+        (0, calendars_1.saveUserTokens)(code);
         res.send('認証が完了しました。LINEに戻ってください。');
     }
     catch (error) {

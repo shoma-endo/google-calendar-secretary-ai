@@ -13,14 +13,14 @@ const authUrl = oauth2Client.generateAuthUrl({
     scope: 'https://www.googleapis.com/auth/calendar',
 });
 exports.authUrl = authUrl;
-async function saveUserTokens(req) {
-    const code = req.query.code;
-    const { tokens } = await oauth2Client.getToken(code);
+async function saveUserTokens(code) {
+    const response = await oauth2Client.getToken(code);
+    const tokens = response.tokens;
     exports.userTokens = userTokens = tokens;
-    console.log(tokens);
+    console.log(userTokens);
 }
 exports.saveUserTokens = saveUserTokens;
-async function deleteUserTokens(req) {
+function deleteUserTokens() {
     exports.userTokens = userTokens = {};
 }
 exports.deleteUserTokens = deleteUserTokens;
