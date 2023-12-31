@@ -4,6 +4,7 @@ import express from 'express'
 import { lineMiddlewareConfig } from '~/clients/line.client'
 
 import { usecases } from './usecases'
+import { saveUserTokens } from '../calendars';
 
 const app = express()
 
@@ -18,6 +19,16 @@ app.post('/webhook', middleware(lineMiddlewareConfig), (req, res) => {
       console.error(err);
       res.status(500).end();
     });
+});
+
+app.get('/callback', async (req, res) => {
+  try {
+    const code = req.query.code as string;
+    saveUserTokens(code);
+    res.send('認証が完了しました。LINEに戻ってください。');
+  } catch (error) {
+    res.send('認証エラーが発生しました。再度ログインをし直してください。');
+  }
 });
 
 const port = process.env.PORT || 3000;
