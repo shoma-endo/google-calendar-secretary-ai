@@ -18,14 +18,14 @@ const authUrl = oauth2Client.generateAuthUrl({
   scope: 'https://www.googleapis.com/auth/calendar', // 必要なスコープを指定
 });
 
-async function saveUserTokens(code: string) {
+async function saveUserTokens(code: string) : Promise<void> {
   const response = await oauth2Client.getToken(code);
   const tokens: Credentials = response.tokens;
   userTokens = tokens;
   console.log(userTokens);
 }
 
-function deleteUserTokens() {
+function deleteUserTokens() : void {
   userTokens = {};
 }
 
