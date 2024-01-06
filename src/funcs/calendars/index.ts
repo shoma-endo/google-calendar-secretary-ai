@@ -1,7 +1,7 @@
-import { google } from 'googleapis';
 import { Credentials } from 'google-auth-library';
+import { google } from 'googleapis';
 
-import { GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_SECRET, APP_URL } from '../../utils/secrets'
+import { APP_URL,GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_SECRET } from '../../utils/secrets'
 
 export let userTokens: Credentials = {};
 
@@ -22,7 +22,7 @@ export const saveUserTokens = async (code: string) : Promise<void> => {
   const response = await oauth2Client.getToken(code);
   const tokens: Credentials = response.tokens;
   userTokens = tokens;
-  console.log(userTokens);
+  console.log(userTokens); // eslint-disable-line no-console
 }
 
 export const deleteUserTokens = (): void => {
