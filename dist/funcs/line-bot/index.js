@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bot_sdk_1 = require("@line/bot-sdk");
 const express_1 = __importDefault(require("express"));
 const line_client_1 = require("~/clients/line.client");
-const usecases_1 = require("./usecases");
 const calendars_1 = require("../calendars");
+const usecases_1 = require("./usecases");
 const app = (0, express_1.default)();
 app.post('/webhook', (0, bot_sdk_1.middleware)(line_client_1.lineMiddlewareConfig), (req, res) => {
     Promise
@@ -21,7 +21,7 @@ app.post('/webhook', (0, bot_sdk_1.middleware)(line_client_1.lineMiddlewareConfi
         res.status(500).end();
     });
 });
-app.get('/callback', async (req, res) => {
+app.get('/callback', (req, res) => {
     try {
         const code = req.query.code;
         (0, calendars_1.saveUserTokens)(code);

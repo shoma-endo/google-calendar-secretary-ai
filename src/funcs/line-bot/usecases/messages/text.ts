@@ -1,7 +1,6 @@
 import { MessageEvent, TextEventMessage } from '@line/bot-sdk'
 
 import { lineClient } from '~/clients/line.client'
-// import { openai } from '~/clients/openai.client'
 import { getOpenaiMessage } from '~/funcs/openai'
 import { makeReplyMessage } from '~/utils/line.util'
 
