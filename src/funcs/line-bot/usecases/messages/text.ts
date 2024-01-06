@@ -3,7 +3,8 @@ import { MessageEvent, TextEventMessage } from '@line/bot-sdk'
 import { lineClient } from '~/clients/line.client'
 import { openai } from '~/clients/openai.client'
 import { makeReplyMessage } from '~/utils/line.util'
-import { authUrl, userTokens, deleteUserTokens } from '../../../calendars';
+
+import { authUrl, deleteUserTokens,userTokens } from '../../../calendars';
 
 export const messageTextUsecase = async (event: MessageEvent): Promise<void> => {
   console.log(event.message); // eslint-disable-line no-console

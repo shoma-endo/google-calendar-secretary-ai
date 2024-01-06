@@ -3,8 +3,8 @@ import express from 'express'
 
 import { lineMiddlewareConfig } from '~/clients/line.client'
 
-import { usecases } from './usecases'
 import { saveUserTokens } from '../calendars';
+import { usecases } from './usecases'
 
 const app = express()
 
@@ -21,7 +21,7 @@ app.post('/webhook', middleware(lineMiddlewareConfig), (req, res) => {
     });
 });
 
-app.get('/callback', async (req, res) => {
+app.get('/callback', (req, res) => {
   try {
     const code = req.query.code as string;
     saveUserTokens(code);
