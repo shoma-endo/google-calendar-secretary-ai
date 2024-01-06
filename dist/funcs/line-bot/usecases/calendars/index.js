@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAccessToken = void 0;
-const googleapis_1 = require("googleapis");
 const google_auth_library_1 = require("google-auth-library");
+const googleapis_1 = require("googleapis");
 const auth = new google_auth_library_1.GoogleAuth({
     keyFile: "service-account-key.json",
     scopes: "https://www.googleapis.com/auth/calendar"
