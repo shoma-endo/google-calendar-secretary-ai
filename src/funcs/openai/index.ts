@@ -17,9 +17,9 @@ export const getOpenaiMessage = async (text: string): Promise<string | null> => 
     if (text.trim() === '削除') {
       return await fetchGoogleCalendarEventsForDeletion();
     } 
-    // 「削除 [イベントID]」の場合は、指定されたイベントを削除
+    // 「削除[イベント番号]」の場合は、指定されたイベントを削除
     else {
-      const eventNumber = parseInt(text.split('')[1]);
+      const eventNumber = parseInt(text.replace('削除', ''));
 			if (isNaN(eventNumber)) {
 				return '有効なイベント番号を入力してください。';
 			}

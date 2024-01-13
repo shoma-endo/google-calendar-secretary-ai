@@ -18,7 +18,7 @@ const getOpenaiMessage = async (text) => {
             return await fetchGoogleCalendarEventsForDeletion();
         }
         else {
-            const eventNumber = parseInt(text.split(' ')[1]);
+            const eventNumber = parseInt(text.replace('削除', ''));
             if (isNaN(eventNumber)) {
                 return '有効なイベント番号を入力してください。';
             }
@@ -82,12 +82,12 @@ const fetchGoogleCalendarEventsForDeletion = async () => {
             return '本日の予定はありません。';
         }
         eventMap.clear();
-        let message = '本日のイベントはこちらです。\n';
+        let message = '本日の予定はこちらです。\n';
         events.forEach((event, index) => {
             eventMap.set(index + 1, event.id);
             message += `${index + 1}: ${event.summary}\n`;
         });
-        message += '削除するイベントは、「削除 1」のように指示してください。';
+        message += '削除したい予定は、「削除1」のように指示してください。';
         return message;
     }
     catch (error) {
