@@ -3,16 +3,32 @@ import { google } from 'googleapis';
 import { oauth2Client } from '../calendars';
 
 export const getOpenaiMessage = async (text: string): Promise<string | null> => {
-	if (text.includes('登録')) {
-		return await registrationJsonGeneration(text);
-	} else if (text.includes('更新')) {
-		// 更新処理関数
-	} else if (text.includes('取得')) {
-		return await fetchGoogleCalendarEvents();
-	} else if (text.includes('削除')) {
-		// 削除処理関数
-	}
-	return 'もう一度文章送って'
+  if (text.includes('登録')) {
+    return await registrationJsonGeneration(text);
+  }
+  else if (text.includes('更新')) {
+    // 更新処理関数
+  }
+  else if (text.includes('取得')) {
+    return await fetchGoogleCalendarEvents();
+  }
+  else if (text.includes('削除')) {
+    // 「削除」というメッセージの場合は、イベント一覧を表示
+    if (text.trim() === '削除') {
+      return await fetchGoogleCalendarEventsForDeletion();
+    } 
+    // 「削除 [イベントID]」の場合は、指定されたイベントを削除
+    else {
+      const eventId = text.split(' ')[1];
+      try {
+        return await deleteEventById(eventId);
+      } catch (error) {
+        console.error(`イベントの削除中にエラーが発生しました: ${error}`);
+        return 'イベントの削除中にエラーが発生しました。';
+      }
+    }
+  }
+  return 'もう一度文章送って';
 }
 
 const registrationJsonGeneration = async (text: string): Promise<string | null> => {
@@ -60,10 +76,56 @@ const fetchGoogleCalendarEvents = async (): Promise<string | null> => {
       return '本日の予定はありません。';
     }
   } catch (err) {
-    console.log('APIからエラーが返されました: ' + err);
+    console.error('APIからエラーが返されました: ' + err);
     return null;
   }
 };
+
+const fetchGoogleCalendarEventsForDeletion = async (): Promise<string | null> => {
+  // 現在の日付を取得
+  const now = new Date();
+
+  try {
+    // Google Calendar APIを呼び出してイベント一覧を取得
+    const res = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: now.toISOString(),
+      timeMax: (new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)).toISOString(),
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+
+    const events = res.data.items;
+    if (!events || events.length === 0) {
+      return '本日の予定はありません。';
+    }
+
+    // イベント一覧をフォーマットして返す
+    return events.map((event, index) => `${index + 1}: ${event.id} - ${event.summary}`).join('\n');
+  } catch (error) {
+    console.error(`APIからエラーが返されました: ${error}`);
+    return 'イベント取得中にエラーが発生しました。';
+  }
+};
+
+// イベント削除メソッド
+const deleteEventById = async (eventId: string): Promise<string | null> => {
+  try {
+    // Google カレンダーAPIを使用してイベントを削除
+    await calendar.events.delete({
+      calendarId: 'primary',
+      eventId: eventId,
+    });
+
+    return 'イベントが削除されました。';
+  } catch (error) {
+    console.error(`イベントの削除中にエラーが発生しました: ${error}`);
+    return 'イベントの削除中にエラーが発生しました。';
+  }
+};
+
+
+
 
 // Googleカレンダーから取得したイベントのフォーマッター
 const formatEvents = (events: any[]): string => {
