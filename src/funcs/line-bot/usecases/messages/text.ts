@@ -14,7 +14,8 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
     // オブジェクトが空かチェック
     if (Object.keys(userTokens).length === 0) {
       // Google認証済みでなければLINEで認証URLを返答する
-      await lineClient.replyMessage(event.replyToken, makeReplyMessage(authUrl));
+      const message = "下記URLからGoogle認証を行なってください。\n" + authUrl;
+      await lineClient.replyMessage(event.replyToken, makeReplyMessage(message));
       return;
     }
 
