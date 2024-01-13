@@ -9,7 +9,7 @@ exports.oauth2Client = new OAuth2(secrets_1.GOOGLE_OAUTH_CLIENT_ID, secrets_1.GO
 exports.authUrl = exports.oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: 'https://www.googleapis.com/auth/calendar',
-});
+}) + "&openExternalBrowser=1";
 const saveUserTokens = async (code) => {
     const response = await exports.oauth2Client.getToken(code);
     const tokens = response.tokens;

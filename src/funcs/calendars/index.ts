@@ -16,7 +16,9 @@ export const oauth2Client = new OAuth2(
 export const authUrl = oauth2Client.generateAuthUrl({
   access_type: 'offline',
   scope: 'https://www.googleapis.com/auth/calendar', // 必要なスコープを指定
-});
+}) + "&openExternalBrowser=1";
+
+// export const authUrl = "https://ageo-soft.info/knowhow/service_knowhow/9908?openExternalBrowser=1"
 
 export const saveUserTokens = async (code: string) : Promise<void> => {
   const response = await oauth2Client.getToken(code);
