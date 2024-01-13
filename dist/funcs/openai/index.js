@@ -18,14 +18,11 @@ const getOpenaiMessage = async (text) => {
             return await fetchGoogleCalendarEventsForDeletion();
         }
         else {
-            const eventId = text.split(' ')[1];
-            try {
-                return await deleteEventById(eventId);
+            const eventNumber = parseInt(text.split(' ')[1]);
+            if (isNaN(eventNumber)) {
+                return '有効なイベント番号を入力してください。';
             }
-            catch (error) {
-                console.error(`イベントの削除中にエラーが発生しました: ${error}`);
-                return 'イベントの削除中にエラーが発生しました。';
-            }
+            return await deleteEventByNumber(eventNumber);
         }
     }
     return 'もう一度文章送って';
@@ -69,6 +66,7 @@ const fetchGoogleCalendarEvents = async () => {
         return null;
     }
 };
+let eventMap = new Map();
 const fetchGoogleCalendarEventsForDeletion = async () => {
     const now = new Date();
     try {
@@ -83,14 +81,25 @@ const fetchGoogleCalendarEventsForDeletion = async () => {
         if (!events || events.length === 0) {
             return '本日の予定はありません。';
         }
-        return events.map((event, index) => `${index + 1}: ${event.id} - ${event.summary}`).join('\n');
+        eventMap.clear();
+        let message = '本日のイベントはこちらです。\n';
+        events.forEach((event, index) => {
+            eventMap.set(index + 1, event.id);
+            message += `${index + 1}: ${event.summary}\n`;
+        });
+        message += '削除するイベントは、「削除 1」のように指示してください。';
+        return message;
     }
     catch (error) {
-        console.error(`APIからエラーが返されました: ${error}`);
-        return 'イベント取得中にエラーが発生しました。';
+        console.error(`イベントの取得中にエラーが発生しました: ${error}`);
+        return 'イベントの取得中にエラーが発生しました。';
     }
 };
-const deleteEventById = async (eventId) => {
+const deleteEventByNumber = async (eventNumber) => {
+    const eventId = eventMap.get(eventNumber);
+    if (!eventId) {
+        return '無効なイベント番号です。';
+    }
     try {
         await calendar.events.delete({
             calendarId: 'primary',

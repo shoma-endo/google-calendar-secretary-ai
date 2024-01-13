@@ -19,14 +19,12 @@ export const getOpenaiMessage = async (text: string): Promise<string | null> => 
     } 
     // 「削除 [イベントID]」の場合は、指定されたイベントを削除
     else {
-      const eventId = text.split(' ')[1];
-      try {
-        return await deleteEventById(eventId);
-      } catch (error) {
-        console.error(`イベントの削除中にエラーが発生しました: ${error}`);
-        return 'イベントの削除中にエラーが発生しました。';
-      }
-    }
+      const eventNumber = parseInt(text.split('')[1]);
+			if (isNaN(eventNumber)) {
+				return '有効なイベント番号を入力してください。';
+			}
+			return await deleteEventByNumber(eventNumber);
+		}
   }
   return 'もう一度文章送って';
 }
@@ -45,10 +43,9 @@ const registrationJsonGeneration = async (text: string): Promise<string | null> 
 
 /** 
  * GoogleカレンダーAPIのバージョンv3を使用
- * 認証にはoauth2Clientを使用してカレンダーを初期化します。
+ * 認証にはoauth2Clientを使用してカレンダー情報を初期化します。
  **/
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
 
 /**
  * Googleカレンダーからイベントを取得する関数
@@ -81,6 +78,7 @@ const fetchGoogleCalendarEvents = async (): Promise<string | null> => {
   }
 };
 
+let eventMap = new Map();
 const fetchGoogleCalendarEventsForDeletion = async (): Promise<string | null> => {
   // 現在の日付を取得
   const now = new Date();
@@ -101,15 +99,28 @@ const fetchGoogleCalendarEventsForDeletion = async (): Promise<string | null> =>
     }
 
     // イベント一覧をフォーマットして返す
-    return events.map((event, index) => `${index + 1}: ${event.id} - ${event.summary}`).join('\n');
-  } catch (error) {
-    console.error(`APIからエラーが返されました: ${error}`);
-    return 'イベント取得中にエラーが発生しました。';
+    eventMap.clear();
+		let message = '本日の予定はこちらです。\n';
+		events.forEach((event, index) => {
+			// イベントの番号とIDをマップに保存
+			eventMap.set(index + 1, event.id);
+			message += `${index + 1}: ${event.summary}\n`;
+		});
+		message += '削除したい予定は、「削除1」のように指示してください。';
+  	return message;
+	} catch (error) {
+    console.error(`イベントの取得中にエラーが発生しました: ${error}`);
+    return 'イベントの取得中にエラーが発生しました。';
   }
 };
 
-// イベント削除メソッド
-const deleteEventById = async (eventId: string): Promise<string | null> => {
+const deleteEventByNumber = async (eventNumber: number): Promise<string | null> => {
+  const eventId = eventMap.get(eventNumber);
+  if (!eventId) {
+    return '無効なイベント番号です。';
+  }
+
+  // イベント削除処理
   try {
     // Google カレンダーAPIを使用してイベントを削除
     await calendar.events.delete({
@@ -123,9 +134,6 @@ const deleteEventById = async (eventId: string): Promise<string | null> => {
     return 'イベントの削除中にエラーが発生しました。';
   }
 };
-
-
-
 
 // Googleカレンダーから取得したイベントのフォーマッター
 const formatEvents = (events: any[]): string => {
