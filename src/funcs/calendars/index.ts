@@ -22,6 +22,7 @@ export const saveUserTokens = async (code: string) : Promise<void> => {
   const response = await oauth2Client.getToken(code);
   const tokens: Credentials = response.tokens;
   userTokens = tokens;
+  oauth2Client.setCredentials(tokens); // ここでトークンを設定
   console.log(userTokens); // eslint-disable-line no-console
 }
 
