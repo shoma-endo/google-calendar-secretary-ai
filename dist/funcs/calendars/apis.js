@@ -32,8 +32,8 @@ const fetchGoogleCalendarEvents = async () => {
 };
 exports.fetchGoogleCalendarEvents = fetchGoogleCalendarEvents;
 let eventMap = new Map();
+const now = new Date();
 const fetchGoogleCalendarEventsForDeletion = async () => {
-    const now = new Date();
     try {
         const res = await calendar.events.list({
             calendarId: 'primary',
@@ -71,7 +71,25 @@ const deleteEventByNumber = async (eventNumber) => {
             calendarId: 'primary',
             eventId: eventId,
         });
-        return 'イベントが削除されました。';
+        const res = await calendar.events.list({
+            calendarId: 'primary',
+            timeMin: now.toISOString(),
+            timeMax: (new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)).toISOString(),
+            singleEvents: true,
+            orderBy: 'startTime',
+        });
+        const events = res.data.items;
+        if (!events || events.length === 0) {
+            return '削除されました。本日の予定はありません。';
+        }
+        eventMap.clear();
+        let message = '削除されました。\n本日の予定はこちらです。\n';
+        events.forEach((event, index) => {
+            eventMap.set(index + 1, event.id);
+            message += `${index + 1}: ${event.summary}\n`;
+        });
+        message += '他に削除したい予定があれば、「削除1」のように指示してください。';
+        return message;
     }
     catch (error) {
         console.error(`イベントの削除中にエラーが発生しました: ${error}`);
