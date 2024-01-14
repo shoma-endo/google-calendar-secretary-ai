@@ -117,9 +117,7 @@ const formatEvents = (events) => {
         else {
             message += `・終日: ${title}\n場所: ${location}\n`;
         }
-        if (index < events.length - 1) {
-            message += '------------------\n';
-        }
+        message += '------------------\n';
     });
     message += '以上です。よい一日をお過ごしください✨';
     return message;

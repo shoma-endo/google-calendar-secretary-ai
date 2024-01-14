@@ -3,12 +3,12 @@ import { oauth2Client } from '../calendars';
 
 /** 
  * GoogleカレンダーAPIのバージョンv3を使用
- * 認証にはoauth2Clientを使用してカレンダー情報を初期化します。
+ * 認証にはoauth2Clientを使用してカレンダー情報を初期化
  **/
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
 /**
- * Googleカレンダーからイベントを取得する関数
+ * Googleカレンダーから
  * 現在の日時から翌日の0時までのイベントを取得
  **/
 export const fetchGoogleCalendarEvents = async (): Promise<string | null> => {
@@ -38,10 +38,10 @@ export const fetchGoogleCalendarEvents = async (): Promise<string | null> => {
   }
 };
 
-let eventMap = new Map();
-// 現在の日付を取得
-const now = new Date();
+let eventMap = new Map(); // イベント一覧
+const now = new Date(); // 現在の日付
 
+// 「削除」というメッセージの場合は、イベント一覧を表示
 export const fetchGoogleCalendarEventsForDeletion = async (): Promise<string | null> => {
   try {
     // Google Calendar APIを呼び出してイベント一覧を取得
@@ -74,6 +74,7 @@ export const fetchGoogleCalendarEventsForDeletion = async (): Promise<string | n
   }
 };
 
+// 「削除[イベント番号]」の場合は、指定されたイベントを削除
 export const deleteEventByNumber = async (eventNumber: number): Promise<string | null> => {
   const eventId = eventMap.get(eventNumber);
   if (!eventId) {
@@ -118,7 +119,9 @@ export const deleteEventByNumber = async (eventNumber: number): Promise<string |
   }
 };
 
-// Googleカレンダーから取得したイベントのフォーマッター
+/**
+ * Googleカレンダーから取得したイベントのフォーマッター
+ **/
 const formatEvents = (events: Array<calendar_v3.Schema$Event>): string => {
   if (!events.length) {
     return '本日の予定は特にありません。';
