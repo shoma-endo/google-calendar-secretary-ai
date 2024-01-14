@@ -14,6 +14,7 @@ const saveUserTokens = async (code) => {
     const response = await exports.oauth2Client.getToken(code);
     const tokens = response.tokens;
     exports.userTokens = tokens;
+    exports.oauth2Client.setCredentials(tokens);
     console.log(exports.userTokens);
 };
 exports.saveUserTokens = saveUserTokens;
