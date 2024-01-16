@@ -1,4 +1,4 @@
-import { google, calendar_v3} from 'googleapis';
+import { google, calendar_v3 } from 'googleapis';
 import { oauth2Client } from '../calendars';
 
 /** 
@@ -8,10 +8,26 @@ import { oauth2Client } from '../calendars';
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
 /**
+ * Googleカレンダー登録処理
+ **/
+export const insertCalendar = async (event: string): Promise<string> => {
+  const result = await calendar.events.insert({ 
+    calendarId: 'primary',
+    requestBody: event as calendar_v3.Schema$Event
+  })
+	return result.status === 200 ? returnMessage.registrationSuccess : returnMessage.registrationFailure
+};
+
+const returnMessage = {
+  'registrationSuccess': 'カレンダー登録に成功しました！',
+  'registrationFailure': 'カレンダー登録に失敗しました'
+} as const
+
+/**
  * Googleカレンダーから
  * 現在の日時から翌日の0時までのイベントを取得
  **/
-export const fetchGoogleCalendarEvents = async (): Promise<string | null> => {
+export const fetchGoogleCalendarEvents = async (): Promise<string> => {
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -34,7 +50,7 @@ export const fetchGoogleCalendarEvents = async (): Promise<string | null> => {
     }
   } catch (err) {
     console.error('APIからエラーが返されました: ' + err);
-    return null;
+    return '取得できませんでした。開発者にお問い合わせください。';
   }
 };
 
@@ -42,7 +58,7 @@ let eventMap = new Map(); // イベント一覧
 const now = new Date(); // 現在の日付
 
 // 「削除」というメッセージの場合は、イベント一覧を表示
-export const fetchGoogleCalendarEventsForDeletion = async (): Promise<string | null> => {
+export const fetchGoogleCalendarEventsForDeletion = async (): Promise<string> => {
   try {
     // Google Calendar APIを呼び出してイベント一覧を取得
     const res = await calendar.events.list({
@@ -75,7 +91,7 @@ export const fetchGoogleCalendarEventsForDeletion = async (): Promise<string | n
 };
 
 // 「削除[イベント番号]」の場合は、指定されたイベントを削除
-export const deleteEventByNumber = async (eventNumber: number): Promise<string | null> => {
+export const deleteEventByNumber = async (eventNumber: number): Promise<string> => {
   const eventId = eventMap.get(eventNumber);
   if (!eventId) {
     return '無効なイベント番号です。';

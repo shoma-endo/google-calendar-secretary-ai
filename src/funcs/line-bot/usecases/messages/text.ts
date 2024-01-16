@@ -20,12 +20,8 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
     }
 
     const { text } = event.message as TextEventMessage
-    const response = await getOpenaiMessage(text)
-    if (response === null) {
-      throw new Error('openaiResponse is null')
-    }
-    console.log(response) // eslint-disable-line no-console
-    await lineClient.replyMessage(event.replyToken, makeReplyMessage(response))
+    const createMessage = await getOpenaiMessage(text)
+    await lineClient.replyMessage(event.replyToken, makeReplyMessage(createMessage))
   } catch {
     throw new Error('message text Usecase')
   }
