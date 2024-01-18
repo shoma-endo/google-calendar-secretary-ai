@@ -1,4 +1,5 @@
-import { google, calendar_v3 } from 'googleapis';
+import { calendar_v3,google } from 'googleapis';
+
 import { oauth2Client } from '../calendars';
 
 /** 
@@ -54,7 +55,7 @@ export const fetchGoogleCalendarEvents = async (): Promise<string> => {
   }
 };
 
-let eventMap = new Map(); // イベント一覧
+const eventMap = new Map(); // イベント一覧
 const now = new Date(); // 現在の日付
 
 // 「削除」というメッセージの場合は、イベント一覧を表示

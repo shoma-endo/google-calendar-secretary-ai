@@ -1,4 +1,5 @@
 import { openai } from '~/clients/openai.client'
+
 import { fetchGoogleCalendarEvents, insertCalendar } from '../calendars/apis'
 import { fetchGoogleCalendarEventsForDeletion } from '../calendars/apis'
 import { deleteEventByNumber } from '../calendars/apis'

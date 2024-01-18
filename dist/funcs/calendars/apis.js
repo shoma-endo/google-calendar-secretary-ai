@@ -43,7 +43,7 @@ const fetchGoogleCalendarEvents = async () => {
     }
 };
 exports.fetchGoogleCalendarEvents = fetchGoogleCalendarEvents;
-let eventMap = new Map();
+const eventMap = new Map();
 const now = new Date();
 const fetchGoogleCalendarEventsForDeletion = async () => {
     try {
