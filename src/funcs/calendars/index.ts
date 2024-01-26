@@ -20,12 +20,24 @@ export const authUrl = oauth2Client.generateAuthUrl({
 
 export const saveUserTokens = async (code: string) : Promise<void> => {
   const response = await oauth2Client.getToken(code);
-  const tokens: Credentials = response.tokens;
-  userTokens = tokens;
-  oauth2Client.setCredentials(tokens); // ここでトークンを設定
+  userTokens = response.tokens;
+  oauth2Client.setCredentials(userTokens); // ここでトークンを設定
   console.log(userTokens); // eslint-disable-line no-console
+}
+
+export const updateAccessToken = async () : Promise<void> => {
+  try {
+    // リフレッシュトークンを基にアクセストークンを再度生成する
+    const { credentials } = await oauth2Client.refreshAccessToken();
+    userTokens = credentials
+    console.log(userTokens); // eslint-disable-line no-console
+  } catch {
+    // リフレッシュトークンがない、または期限切れの場合はトークン情報削除
+    deleteUserTokens();
+  }
 }
 
 export const deleteUserTokens = (): void => {
   userTokens = {};
+  oauth2Client.setCredentials({});
 }
