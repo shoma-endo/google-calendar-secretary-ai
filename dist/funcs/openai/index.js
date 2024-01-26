@@ -11,6 +11,7 @@ const getOpenaiMessage = async (text) => {
         if (registrationJson === null) {
             throw new Error('openaiResponse is null');
         }
+        console.log(registrationJson);
         return await (0, apis_1.insertCalendar)(registrationJson);
     }
     else if (text.includes('更新')) {
@@ -36,10 +37,10 @@ exports.getOpenaiMessage = getOpenaiMessage;
 const registrationJsonGeneration = async (text) => {
     const completion = await openai_client_1.openai.chat.completions.create({
         messages: [
-            { "role": "system", "content": 'Assistant to create Google calendar api registration request parameters. Please create them based on the instructions from the user. If there are any missing instructions, please tell us each time in Japanese only.' },
-            { "role": "user", "content": 'Please create the request parameters for calendar registration according to the following request. Time zone should be Japan time.' + text },
+            { "role": "system", "content": 'You are an assistant to format text. For the given string, parse the Google Calendar api registration request parameters in JSON format. The JSON key timeZone is assumed to be Asia/Tokyo' },
+            { "role": "user", "content": text },
         ],
-        model: "gpt-4",
+        model: "gpt-3.5-turbo-1106",
         response_format: { "type": "json_object" }
     });
     return completion.choices[0].message.content;

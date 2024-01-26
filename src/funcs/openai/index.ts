@@ -38,10 +38,10 @@ export const getOpenaiMessage = async (text: string): Promise<string> => {
 const registrationJsonGeneration = async (text: string): Promise<string | null> => {
 	const completion = await openai.chat.completions.create({
     messages: [
-			{"role": "system", "content": 'Assistant to create Google calendar api registration request parameters. Please create them based on the instructions from the user. If there are any missing instructions, please tell us each time in Japanese only.'},
-      {"role": "user", "content": 'Please create the request parameters for calendar registration according to the following request. Time zone should be Japan time.' + text },
+			{"role": "system", "content": 'You are an assistant to format text. For the given string, parse the Google Calendar api registration request parameters in JSON format. The JSON key timeZone is assumed to be Asia/Tokyo'},
+      {"role": "user", "content": text },
 		],
-    model: "gpt-4",
+    model: "gpt-3.5-turbo-1106",
     response_format: { "type": "json_object" }
   });
   return completion.choices[0].message.content;
