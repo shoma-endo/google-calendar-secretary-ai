@@ -1,9 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEventByNumber = exports.fetchGoogleCalendarEventsForDeletion = exports.fetchGoogleCalendarEvents = void 0;
+exports.deleteEventByNumber = exports.fetchGoogleCalendarEventsForDeletion = exports.fetchGoogleCalendarEvents = exports.insertCalendar = void 0;
 const googleapis_1 = require("googleapis");
 const calendars_1 = require("../calendars");
 const calendar = googleapis_1.google.calendar({ version: 'v3', auth: calendars_1.oauth2Client });
+const insertCalendar = async (event) => {
+    const result = await calendar.events.insert({
+        calendarId: 'primary',
+        requestBody: event
+    });
+    return result.status === 200 ? returnMessage.registrationSuccess : returnMessage.registrationFailure;
+};
+exports.insertCalendar = insertCalendar;
+const returnMessage = {
+    'registrationSuccess': 'カレンダー登録に成功しました！',
+    'registrationFailure': 'カレンダー登録に失敗しました'
+};
 const fetchGoogleCalendarEvents = async () => {
     const now = new Date();
     const tomorrow = new Date(now);
@@ -27,11 +39,11 @@ const fetchGoogleCalendarEvents = async () => {
     }
     catch (err) {
         console.error('APIからエラーが返されました: ' + err);
-        return null;
+        return '取得できませんでした。開発者にお問い合わせください。';
     }
 };
 exports.fetchGoogleCalendarEvents = fetchGoogleCalendarEvents;
-let eventMap = new Map();
+const eventMap = new Map();
 const now = new Date();
 const fetchGoogleCalendarEventsForDeletion = async () => {
     try {

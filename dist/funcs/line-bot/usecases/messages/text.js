@@ -16,12 +16,8 @@ const messageTextUsecase = async (event) => {
             return;
         }
         const { text } = event.message;
-        const response = await (0, openai_1.getOpenaiMessage)(text);
-        if (response === null) {
-            throw new Error('openaiResponse is null');
-        }
-        console.log(response);
-        await line_client_1.lineClient.replyMessage(event.replyToken, (0, line_util_1.makeReplyMessage)(response));
+        const createMessage = await (0, openai_1.getOpenaiMessage)(text);
+        await line_client_1.lineClient.replyMessage(event.replyToken, (0, line_util_1.makeReplyMessage)(createMessage));
     }
     catch {
         throw new Error('message text Usecase');
