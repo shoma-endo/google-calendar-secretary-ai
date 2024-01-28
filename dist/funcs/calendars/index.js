@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserTokens = exports.updateAccessToken = exports.saveUserTokens = exports.authUrl = exports.oauth2Client = exports.userTokens = void 0;
+exports.updateAccessToken = exports.saveUserTokens = exports.authUrl = exports.oauth2Client = exports.userTokens = void 0;
 const googleapis_1 = require("googleapis");
 const secrets_1 = require("../../utils/secrets");
 exports.userTokens = {};
@@ -24,7 +24,7 @@ const updateAccessToken = async () => {
         console.log(exports.userTokens);
     }
     catch {
-        (0, exports.deleteUserTokens)();
+        deleteUserTokens();
     }
 };
 exports.updateAccessToken = updateAccessToken;
@@ -32,4 +32,3 @@ const deleteUserTokens = () => {
     exports.userTokens = {};
     exports.oauth2Client.setCredentials({});
 };
-exports.deleteUserTokens = deleteUserTokens;

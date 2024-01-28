@@ -11,7 +11,7 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
     const currentTime = new Date().getTime();
     // 有効期限のチェック
     if (typeof userTokens?.expiry_date === 'number' && userTokens?.expiry_date <= currentTime) {
-      updateAccessToken();
+      await updateAccessToken();
     }
 
     // オブジェクトが空かチェック

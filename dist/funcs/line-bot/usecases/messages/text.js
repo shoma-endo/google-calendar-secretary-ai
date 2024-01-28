@@ -9,7 +9,7 @@ const messageTextUsecase = async (event) => {
     try {
         const currentTime = new Date().getTime();
         if (typeof calendars_1.userTokens?.expiry_date === 'number' && calendars_1.userTokens?.expiry_date <= currentTime) {
-            (0, calendars_1.updateAccessToken)();
+            await (0, calendars_1.updateAccessToken)();
         }
         if (Object.keys(calendars_1.userTokens).length === 0) {
             const message = "下記URLからGoogle認証を行なってください。\n" + calendars_1.authUrl;

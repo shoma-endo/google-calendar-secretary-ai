@@ -37,7 +37,7 @@ export const updateAccessToken = async () : Promise<void> => {
   }
 }
 
-export const deleteUserTokens = (): void => {
+const deleteUserTokens = (): void => {
   userTokens = {};
   oauth2Client.setCredentials({});
 }
