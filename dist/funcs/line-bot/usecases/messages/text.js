@@ -12,7 +12,9 @@ const messageTextUsecase = async (event) => {
             await (0, calendars_1.updateAccessToken)();
         }
         if (Object.keys(calendars_1.userTokens).length === 0) {
-            const message = "下記URLからGoogle認証を行なってください。\n" + calendars_1.authUrl;
+            const userId = event.source.userId;
+            const authUrl = (0, calendars_1.generateAuthUrl)(userId);
+            const message = "下記URLからGoogle認証を行なってください。\n" + authUrl;
             await line_client_1.lineClient.replyMessage(event.replyToken, (0, line_util_1.makeReplyMessage)(message));
             return;
         }
