@@ -4,7 +4,7 @@ import { lineClient } from '~/clients/line.client'
 import { getOpenaiMessage } from '~/funcs/openai'
 import { makeReplyMessage } from '~/utils/line.util'
 
-import { authUrl, updateAccessToken, userTokens } from '../../../calendars';
+import { generateAuthUrl, updateAccessToken, userTokens } from '../../../calendars';
 
 export const messageTextUsecase = async (event: MessageEvent): Promise<void> => {
   try {
@@ -17,6 +17,8 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
     // オブジェクトが空かチェック
     if (Object.keys(userTokens).length === 0) {
       // Google認証済みでなければLINEで認証URLを返答する
+      const userId = event.source.userId as string;
+      const authUrl = generateAuthUrl(userId);
       const message = "下記URLからGoogle認証を行なってください。\n" + authUrl;
       await lineClient.replyMessage(event.replyToken, makeReplyMessage(message));
       return;

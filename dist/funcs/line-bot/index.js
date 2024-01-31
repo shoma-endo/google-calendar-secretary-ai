@@ -24,7 +24,9 @@ app.post('/webhook', (0, bot_sdk_1.middleware)(line_client_1.lineMiddlewareConfi
 app.get('/callback', (req, res) => {
     try {
         const code = req.query.code;
+        const userId = req.query.state;
         (0, calendars_1.saveUserTokens)(code);
+        (0, calendars_1.sendGoogleMessage)(userId);
         res.send('認証が完了しました。LINEに戻ってください。');
     }
     catch (error) {

@@ -3,7 +3,7 @@ import express from 'express'
 
 import { lineMiddlewareConfig } from '~/clients/line.client'
 
-import { saveUserTokens } from '../calendars';
+import { saveUserTokens, sendGoogleMessage } from '../calendars';
 import { usecases } from './usecases'
 
 const app = express()
@@ -24,7 +24,9 @@ app.post('/webhook', middleware(lineMiddlewareConfig), (req, res) => {
 app.get('/callback', (req, res) => {
   try {
     const code = req.query.code as string;
+    const userId = req.query.state as string;
     saveUserTokens(code);
+    sendGoogleMessage(userId);
     res.send('認証が完了しました。LINEに戻ってください。');
   } catch (error) {
     res.send('認証エラーが発生しました。再度ログインをし直してください。');

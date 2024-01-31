@@ -1,15 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateAccessToken = exports.saveUserTokens = exports.authUrl = exports.oauth2Client = exports.userTokens = void 0;
+exports.sendGoogleMessage = exports.updateAccessToken = exports.saveUserTokens = exports.generateAuthUrl = exports.oauth2Client = exports.userTokens = void 0;
 const googleapis_1 = require("googleapis");
 const secrets_1 = require("../../utils/secrets");
+const line_client_1 = require("~/clients/line.client");
+const oauth_1 = require("~lineBot/notice-messages/oauth");
 exports.userTokens = {};
 const OAuth2 = googleapis_1.google.auth.OAuth2;
 exports.oauth2Client = new OAuth2(secrets_1.GOOGLE_OAUTH_CLIENT_ID, secrets_1.GOOGLE_OAUTH_SECRET, secrets_1.APP_URL + "/callback");
-exports.authUrl = exports.oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: 'https://www.googleapis.com/auth/calendar',
-}) + "&openExternalBrowser=1";
+const generateAuthUrl = (userId) => {
+    return exports.oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: 'https://www.googleapis.com/auth/calendar',
+        state: userId
+    }) + "&openExternalBrowser=1";
+};
+exports.generateAuthUrl = generateAuthUrl;
 const saveUserTokens = async (code) => {
     const response = await exports.oauth2Client.getToken(code);
     exports.userTokens = response.tokens;
@@ -32,3 +38,7 @@ const deleteUserTokens = () => {
     exports.userTokens = {};
     exports.oauth2Client.setCredentials({});
 };
+const sendGoogleMessage = async (userId) => {
+    await line_client_1.lineClient.pushMessage(userId, oauth_1.msgExample);
+};
+exports.sendGoogleMessage = sendGoogleMessage;
