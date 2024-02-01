@@ -7,7 +7,7 @@ const apis_2 = require("../calendars/apis");
 const apis_3 = require("../calendars/apis");
 const getOpenaiMessage = async (text) => {
     if (text.includes('登録')) {
-        const registrationJson = await registrationJsonGeneration(text);
+        const registrationJson = await calendarJsonGeneration(text);
         if (registrationJson === null) {
             throw new Error('openaiResponse is null');
         }
@@ -15,6 +15,11 @@ const getOpenaiMessage = async (text) => {
         return await (0, apis_1.insertCalendar)(registrationJson);
     }
     else if (text.includes('更新')) {
+        const updateJson = await calendarJsonGeneration(text);
+        if (updateJson === null) {
+            throw new Error('openaiResponse is null');
+        }
+        return await (0, apis_1.updateCalendar)(text, updateJson);
     }
     else if (text.includes('取得')) {
         return await (0, apis_1.fetchGoogleCalendarEvents)();
@@ -34,10 +39,10 @@ const getOpenaiMessage = async (text) => {
     return 'もう一度文章送って';
 };
 exports.getOpenaiMessage = getOpenaiMessage;
-const registrationJsonGeneration = async (text) => {
+const calendarJsonGeneration = async (text) => {
     const completion = await openai_client_1.openai.chat.completions.create({
         messages: [
-            { "role": "system", "content": 'You are an assistant to format text. For the given string, parse the Google Calendar api registration request parameters in JSON format. The JSON key timeZone is assumed to be Asia/Tokyo' },
+            { "role": "system", "content": 'You are the text formatting assistant. Parses the Google Calendar event API request parameters in JSON format for the string provided by the user. The timeZone of the JSON key should be Asia/Tokyo.' },
             { "role": "user", "content": text },
         ],
         model: "gpt-3.5-turbo-1106",

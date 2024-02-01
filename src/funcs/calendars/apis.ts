@@ -19,9 +19,25 @@ export const insertCalendar = async (event: string): Promise<string> => {
 	return result.status === 200 ? returnMessage.registrationSuccess : returnMessage.registrationFailure
 };
 
+/**
+ * Googleカレンダー更新処理
+ **/
+export const updateCalendar = async (text: string, json: string): Promise<string> => {
+  const event = await getGoogleCalendarEvent(text);
+  if (typeof event === 'string' ) return event;
+  const result = await calendar.events.update({ 
+    calendarId: 'primary',
+    eventId: event[0].id as string,
+    requestBody: json as calendar_v3.Schema$Event
+  })
+	return result.status === 200 ? returnMessage.updateSuccess : returnMessage.updateFailure
+};
+
 const returnMessage = {
   'registrationSuccess': 'カレンダー登録に成功しました！',
-  'registrationFailure': 'カレンダー登録に失敗しました'
+  'registrationFailure': 'カレンダー登録に失敗しました',
+  'updateSuccess': 'カレンダー更新に成功しました！',
+  'updateFailure': 'カレンダー更新に失敗しました'
 } as const
 
 /**
@@ -169,4 +185,39 @@ const formatEvents = (events: Array<calendar_v3.Schema$Event>): string => {
 
   message += '以上です。よい一日をお過ごしください✨';
   return message;
+};
+
+/**
+ * Googleカレンダーから
+ * 入力された日付のイベントを取得
+ **/
+const getGoogleCalendarEvent = async (text: string): Promise<calendar_v3.Schema$Event[] | string> => {
+  const regex = /(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2})〜(\d{1,2})時/;
+  const matches = text.match(regex);
+
+  try {
+    if (matches) {
+      const [date, year, month, day, startHour, endHour] = matches;
+      const res = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin:  `${year}-${month}-${day}T${startHour}:00:00Z`,
+        timeMax: `${year}-${month}-${day}T${endHour}:00:00Z`,
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
+
+      const events = res.data.items;
+      console.log(res); // eslint-disable-line no-console
+      console.log(events); // eslint-disable-line no-console
+      if (events?.length) {
+        return events;
+      } else {
+        return `${date}の予定はありません。`;
+      }
+    }
+    return '西暦から日付を入力してください。';
+  } catch (err) {
+    console.error('APIからエラーが返されました: ' + err);
+    return '取得できませんでした。開発者にお問い合わせください。';
+  }
 };
