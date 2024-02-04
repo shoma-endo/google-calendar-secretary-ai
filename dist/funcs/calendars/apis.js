@@ -156,13 +156,12 @@ const getGoogleCalendarEvent = async (text) => {
             const [date, year, month, day, startHour, endHour] = matches;
             const res = await calendar.events.list({
                 calendarId: 'primary',
-                timeMin: (new Date(parseInt(year), parseInt(month) + 1, parseInt(day), parseInt(startHour))).toISOString(),
-                timeMax: (new Date(parseInt(year), parseInt(month) + 1, parseInt(day), parseInt(endHour))).toISOString(),
+                timeMin: (new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(startHour))).toISOString(),
+                timeMax: (new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(endHour))).toISOString(),
                 singleEvents: true,
                 orderBy: 'startTime',
             });
             const events = res.data.items;
-            console.log(events);
             if (events?.length) {
                 return events;
             }

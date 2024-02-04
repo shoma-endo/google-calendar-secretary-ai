@@ -190,6 +190,7 @@ const formatEvents = (events: Array<calendar_v3.Schema$Event>): string => {
 /**
  * Googleカレンダーから
  * 入力された日付のイベントを取得
+ * 2024年2月23日 18〜21時の予定を2024年2月15日 18〜23時に更新してください
  **/
 const getGoogleCalendarEvent = async (text: string): Promise<calendar_v3.Schema$Event[] | string> => {
   const regex = /(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2})〜(\d{1,2})時/;
@@ -200,8 +201,8 @@ const getGoogleCalendarEvent = async (text: string): Promise<calendar_v3.Schema$
       const [date, year, month, day, startHour, endHour] = matches;
       const res = await calendar.events.list({
         calendarId: 'primary',
-        timeMin:  (new Date(parseInt(year), parseInt(month) + 1, parseInt(day), parseInt(startHour))).toISOString(),
-        timeMax: (new Date(parseInt(year), parseInt(month) + 1, parseInt(day), parseInt(endHour))).toISOString(),
+        timeMin:  (new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(startHour))).toISOString(),
+        timeMax: (new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(endHour))).toISOString(),
         singleEvents: true,
         orderBy: 'startTime',
       });
