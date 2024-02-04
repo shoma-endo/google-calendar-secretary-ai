@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEventByNumber = exports.fetchGoogleCalendarEventsForDeletion = exports.fetchGoogleCalendarEvents = exports.insertCalendar = void 0;
+exports.deleteEventByNumber = exports.fetchGoogleCalendarEventsForDeletion = exports.fetchGoogleCalendarEvents = exports.updateCalendar = exports.insertCalendar = void 0;
 const googleapis_1 = require("googleapis");
 const calendars_1 = require("../calendars");
 const calendar = googleapis_1.google.calendar({ version: 'v3', auth: calendars_1.oauth2Client });
@@ -12,9 +12,23 @@ const insertCalendar = async (event) => {
     return result.status === 200 ? returnMessage.registrationSuccess : returnMessage.registrationFailure;
 };
 exports.insertCalendar = insertCalendar;
+const updateCalendar = async (text, json) => {
+    const event = await getGoogleCalendarEvent(text);
+    if (typeof event === 'string')
+        return event;
+    const result = await calendar.events.update({
+        calendarId: 'primary',
+        eventId: event[0].id,
+        requestBody: json
+    });
+    return result.status === 200 ? returnMessage.updateSuccess : returnMessage.updateFailure;
+};
+exports.updateCalendar = updateCalendar;
 const returnMessage = {
     'registrationSuccess': 'カレンダー登録に成功しました！',
-    'registrationFailure': 'カレンダー登録に失敗しました'
+    'registrationFailure': 'カレンダー登録に失敗しました',
+    'updateSuccess': 'カレンダー更新に成功しました！',
+    'updateFailure': 'カレンダー更新に失敗しました'
 };
 const fetchGoogleCalendarEvents = async () => {
     const now = new Date();
@@ -133,4 +147,32 @@ const formatEvents = (events) => {
     });
     message += '以上です。よい一日をお過ごしください✨';
     return message;
+};
+const getGoogleCalendarEvent = async (text) => {
+    const regex = /(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2})〜(\d{1,2})時/;
+    const matches = text.match(regex);
+    try {
+        if (matches) {
+            const [date, year, month, day, startHour, endHour] = matches;
+            const res = await calendar.events.list({
+                calendarId: 'primary',
+                timeMin: (new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(startHour))).toISOString(),
+                timeMax: (new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(endHour))).toISOString(),
+                singleEvents: true,
+                orderBy: 'startTime',
+            });
+            const events = res.data.items;
+            if (events?.length) {
+                return events;
+            }
+            else {
+                return `${date}の予定はありません。`;
+            }
+        }
+        return '西暦から日付を入力してください。';
+    }
+    catch (err) {
+        console.error('APIからエラーが返されました: ' + err);
+        return '取得できませんでした。開発者にお問い合わせください。';
+    }
 };

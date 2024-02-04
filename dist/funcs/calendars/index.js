@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendGoogleMessage = exports.updateAccessToken = exports.saveUserTokens = exports.generateAuthUrl = exports.oauth2Client = exports.userTokens = void 0;
 const googleapis_1 = require("googleapis");
-const secrets_1 = require("../../utils/secrets");
 const line_client_1 = require("~/clients/line.client");
 const oauth_1 = require("~lineBot/notice-messages/oauth");
+const secrets_1 = require("../../utils/secrets");
 exports.userTokens = {};
 const OAuth2 = googleapis_1.google.auth.OAuth2;
 exports.oauth2Client = new OAuth2(secrets_1.GOOGLE_OAUTH_CLIENT_ID, secrets_1.GOOGLE_OAUTH_SECRET, secrets_1.APP_URL + "/callback");
