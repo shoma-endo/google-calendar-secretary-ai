@@ -11,7 +11,6 @@ const getOpenaiMessage = async (text) => {
         if (registrationJson === null) {
             throw new Error('openaiResponse is null');
         }
-        console.log(registrationJson);
         return await (0, apis_1.insertCalendar)(registrationJson);
     }
     else if (text.includes('更新')) {

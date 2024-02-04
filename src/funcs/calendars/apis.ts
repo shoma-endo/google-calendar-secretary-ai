@@ -200,15 +200,13 @@ const getGoogleCalendarEvent = async (text: string): Promise<calendar_v3.Schema$
       const [date, year, month, day, startHour, endHour] = matches;
       const res = await calendar.events.list({
         calendarId: 'primary',
-        timeMin:  `${year}-${month}-${day}T${startHour}:00:00Z`,
-        timeMax: `${year}-${month}-${day}T${endHour}:00:00Z`,
+        timeMin:  (new Date(parseInt(year), parseInt(month) + 1, parseInt(day), parseInt(startHour))).toISOString(),
+        timeMax: (new Date(parseInt(year), parseInt(month) + 1, parseInt(day), parseInt(endHour))).toISOString(),
         singleEvents: true,
         orderBy: 'startTime',
       });
 
       const events = res.data.items;
-      console.log(res); // eslint-disable-line no-console
-      console.log(events); // eslint-disable-line no-console
       if (events?.length) {
         return events;
       } else {

@@ -10,7 +10,6 @@ export const getOpenaiMessage = async (text: string): Promise<string> => {
     if (registrationJson === null) {
       throw new Error('openaiResponse is null')
     }
-    console.log(registrationJson); // eslint-disable-line no-console
     return await insertCalendar(registrationJson);
   }
   else if (text.includes('更新')) {
