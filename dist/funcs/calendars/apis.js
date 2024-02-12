@@ -41,6 +41,7 @@ const getEvents = async (json) => {
             orderBy: 'startTime',
         });
         const events = res.data.items;
+        console.log('取得したイベント:', events);
         if (events?.length) {
             return formatEvents(events);
         }
@@ -124,24 +125,38 @@ const formatEvents = (events) => {
     if (!events.length) {
         return '本日の予定は特にありません。';
     }
-    const eventDate = events[0].start?.dateTime ? new Date(events[0].start.dateTime) : new Date();
-    let message = `${eventDate.getFullYear()}年${eventDate.getMonth() + 1}月${eventDate.getDate()}日のご予定をお知らせします！\n------------------\n`;
-    events.forEach((event) => {
-        const title = event.summary;
-        const location = event.location || '-';
-        if (event.start?.dateTime && event.end?.dateTime) {
-            const start = new Date(event.start.dateTime);
-            const end = new Date(event.end.dateTime);
-            const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
-            const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
-            message += `・${startTime}から${endTime}:\n${title}\n場所: ${location}\n`;
+    const eventsByDate = events.reduce((acc, event) => {
+        const eventStartDate = event.start?.dateTime || event.start?.date;
+        if (!eventStartDate) {
+            return acc;
         }
-        else {
-            message += `・終日: ${title}\n場所: ${location}\n`;
+        const eventDate = new Date(eventStartDate);
+        const dateKey = `${eventDate.getFullYear()}年${eventDate.getMonth() + 1}月${eventDate.getDate()}日`;
+        if (!acc[dateKey]) {
+            acc[dateKey] = [];
         }
-        message += '------------------\n';
+        acc[dateKey].push(event);
+        return acc;
+    }, {});
+    let message = '';
+    Object.entries(eventsByDate).forEach(([date, events]) => {
+        message += `【${date}のご予定】\n━━━━━━━━━━━━━\n`;
+        events.forEach((event) => {
+            const title = event.summary || 'タイトルなし';
+            const location = event.location || '-';
+            if (event.start?.dateTime && event.end?.dateTime) {
+                const start = new Date(event.start.dateTime);
+                const end = new Date(event.end.dateTime);
+                const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+                const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+                message += `▼${startTime} - ${endTime}:\n${title}\n場所: ${location}\n\n`;
+            }
+            else {
+                message += `・終日: ${title}\n場所: ${location}\n\n`;
+            }
+        });
     });
-    message += '以上です。よい一日をお過ごしください✨';
+    message += '以上です。\nよい一日をお過ごしください✨';
     return message;
 };
 const getGoogleCalendarEvent = async (text) => {
