@@ -52,7 +52,7 @@ const fetchGoogleCalendarEvents = async () => {
         }
     }
     catch (err) {
-        console.error('APIからエラーが返されました: ' + err);
+        console.error('APIからエラーが返されました: ', err);
         return '取得できませんでした。開発者にお問い合わせください。';
     }
 };
@@ -128,7 +128,7 @@ const formatEvents = (events) => {
         return '本日の予定は特にありません。';
     }
     let message = '本日のご予定をお知らせします！\n------------------\n';
-    events.forEach((event, index) => {
+    events.forEach((event) => {
         const title = event.summary;
         const location = event.location || '-';
         if (event.start?.dateTime && event.end?.dateTime) {
@@ -136,8 +136,6 @@ const formatEvents = (events) => {
             const end = new Date(event.end.dateTime);
             const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
             const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
-            console.log(`イベント開始時間: ${startTime}`);
-            console.log(`イベント終了時間: ${endTime}`);
             message += `・${startTime}から${endTime}:\n${title}\n場所: ${location}\n`;
         }
         else {
@@ -172,7 +170,7 @@ const getGoogleCalendarEvent = async (text) => {
         return '西暦から日付を入力してください。';
     }
     catch (err) {
-        console.error('APIからエラーが返されました: ' + err);
+        console.error('APIからエラーが返されました: ', err);
         return '取得できませんでした。開発者にお問い合わせください。';
     }
 };
