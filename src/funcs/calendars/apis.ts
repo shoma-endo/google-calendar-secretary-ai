@@ -41,32 +41,29 @@ const returnMessage = {
 } as const
 
 /**
- * Googleカレンダーから
- * 現在の日時から翌日の0時までのイベントを取得
+ * Googleカレンダーから指定された期間のイベントを取得
  **/
-export const fetchGoogleCalendarEvents = async (): Promise<string> => {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-
+export const getEvents = async (json: string): Promise<string> => {
+  const { timeMin, timeMax } = JSON.parse(json);
+  
   try {
     const res = await calendar.events.list({
       calendarId: 'primary',
-      timeMin: now.toISOString(),
-      timeMax: tomorrow.toISOString(),
+      timeMin,
+      timeMax,
       singleEvents: true,
       orderBy: 'startTime',
     });
 
     const events = res.data.items;
+    console.log('取得したイベント:', events);
     if (events?.length) {
       return formatEvents(events);
     } else {
-      return '本日の予定はありません。';
+      return '指定された期間に予定はありません。';
     }
   } catch (err) {
-    console.error('APIからエラーが返されました: ' + err);
+    console.error('APIからエラーが返されました: ', err);
     return '取得できませんでした。開発者にお問い合わせください。';
   }
 };
@@ -160,30 +157,42 @@ const formatEvents = (events: Array<calendar_v3.Schema$Event>): string => {
     return '本日の予定は特にありません。';
   }
 
-  let message = '本日のご予定をお知らせします！\n------------------\n';
-  events.forEach((event, index) => {
-    const title = event.summary;
-    const location = event.location || '-';
-
-    if (event.start?.dateTime && event.end?.dateTime) {
-      const start = new Date(event.start.dateTime);
-      const end = new Date(event.end.dateTime);
-      const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
-      const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
-
-      console.log(`イベント開始時間: ${startTime}`);
-      console.log(`イベント終了時間: ${endTime}`);
-
-      message += `・${startTime}から${endTime}:\n${title}\n場所: ${location}\n`;
-    } else {
-      message += `・終日: ${title}\n場所: ${location}\n`;
+  // イベントを日付ごとに分類
+  const eventsByDate = events.reduce((acc: Record<string, calendar_v3.Schema$Event[]>, event) => {
+    const eventStartDate = event.start?.dateTime || event.start?.date;
+    if (!eventStartDate) {
+      return acc; // イベント開始日がない場合は、アキュムレータをそのまま返す
     }
+    const eventDate = new Date(eventStartDate);
+    const dateKey = `${eventDate.getFullYear()}年${eventDate.getMonth() + 1}月${eventDate.getDate()}日`;
+    if (!acc[dateKey]) {
+      acc[dateKey] = [];
+    }
+    acc[dateKey].push(event);
+    return acc;
+  }, {});
 
-    // イベント間に区切り線を追加
-    message += '------------------\n';
+  let message = '';
+  Object.entries(eventsByDate).forEach(([date, events]) => {
+    message += `【${date}のご予定】\n━━━━━━━━━━━━━\n`;
+    events.forEach((event: calendar_v3.Schema$Event) => {
+      const title = event.summary || 'タイトルなし';
+      const location = event.location || '-';
+
+      if (event.start?.dateTime && event.end?.dateTime) {
+        const start = new Date(event.start.dateTime);
+        const end = new Date(event.end.dateTime);
+        const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+        const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+
+        message += `▼${startTime} - ${endTime}:\n${title}\n場所: ${location}\n\n`;
+      } else {
+        message += `・終日: ${title}\n場所: ${location}\n\n`;
+      }
+    });
   });
 
-  message += '以上です。よい一日をお過ごしください✨';
+  message += '以上です。\nよい一日をお過ごしください✨';
   return message;
 };
 
@@ -216,7 +225,7 @@ const getGoogleCalendarEvent = async (text: string): Promise<calendar_v3.Schema$
     }
     return '西暦から日付を入力してください。';
   } catch (err) {
-    console.error('APIからエラーが返されました: ' + err);
+    console.error('APIからエラーが返されました: ', err);
     return '取得できませんでした。開発者にお問い合わせください。';
   }
 };

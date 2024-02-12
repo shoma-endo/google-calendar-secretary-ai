@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEventByNumber = exports.fetchGoogleCalendarEventsForDeletion = exports.fetchGoogleCalendarEvents = exports.updateCalendar = exports.insertCalendar = void 0;
+exports.deleteEventByNumber = exports.fetchGoogleCalendarEventsForDeletion = exports.getEvents = exports.updateCalendar = exports.insertCalendar = void 0;
 const googleapis_1 = require("googleapis");
 const calendars_1 = require("../calendars");
 const calendar = googleapis_1.google.calendar({ version: 'v3', auth: calendars_1.oauth2Client });
@@ -30,33 +30,31 @@ const returnMessage = {
     'updateSuccess': 'カレンダー更新に成功しました！',
     'updateFailure': 'カレンダー更新に失敗しました'
 };
-const fetchGoogleCalendarEvents = async () => {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
+const getEvents = async (json) => {
+    const { timeMin, timeMax } = JSON.parse(json);
     try {
         const res = await calendar.events.list({
             calendarId: 'primary',
-            timeMin: now.toISOString(),
-            timeMax: tomorrow.toISOString(),
+            timeMin,
+            timeMax,
             singleEvents: true,
             orderBy: 'startTime',
         });
         const events = res.data.items;
+        console.log('取得したイベント:', events);
         if (events?.length) {
             return formatEvents(events);
         }
         else {
-            return '本日の予定はありません。';
+            return '指定された期間に予定はありません。';
         }
     }
     catch (err) {
-        console.error('APIからエラーが返されました: ' + err);
+        console.error('APIからエラーが返されました: ', err);
         return '取得できませんでした。開発者にお問い合わせください。';
     }
 };
-exports.fetchGoogleCalendarEvents = fetchGoogleCalendarEvents;
+exports.getEvents = getEvents;
 const eventMap = new Map();
 const now = new Date();
 const fetchGoogleCalendarEventsForDeletion = async () => {
@@ -127,25 +125,38 @@ const formatEvents = (events) => {
     if (!events.length) {
         return '本日の予定は特にありません。';
     }
-    let message = '本日のご予定をお知らせします！\n------------------\n';
-    events.forEach((event, index) => {
-        const title = event.summary;
-        const location = event.location || '-';
-        if (event.start?.dateTime && event.end?.dateTime) {
-            const start = new Date(event.start.dateTime);
-            const end = new Date(event.end.dateTime);
-            const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
-            const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
-            console.log(`イベント開始時間: ${startTime}`);
-            console.log(`イベント終了時間: ${endTime}`);
-            message += `・${startTime}から${endTime}:\n${title}\n場所: ${location}\n`;
+    const eventsByDate = events.reduce((acc, event) => {
+        const eventStartDate = event.start?.dateTime || event.start?.date;
+        if (!eventStartDate) {
+            return acc;
         }
-        else {
-            message += `・終日: ${title}\n場所: ${location}\n`;
+        const eventDate = new Date(eventStartDate);
+        const dateKey = `${eventDate.getFullYear()}年${eventDate.getMonth() + 1}月${eventDate.getDate()}日`;
+        if (!acc[dateKey]) {
+            acc[dateKey] = [];
         }
-        message += '------------------\n';
+        acc[dateKey].push(event);
+        return acc;
+    }, {});
+    let message = '';
+    Object.entries(eventsByDate).forEach(([date, events]) => {
+        message += `【${date}のご予定】\n━━━━━━━━━━━━━\n`;
+        events.forEach((event) => {
+            const title = event.summary || 'タイトルなし';
+            const location = event.location || '-';
+            if (event.start?.dateTime && event.end?.dateTime) {
+                const start = new Date(event.start.dateTime);
+                const end = new Date(event.end.dateTime);
+                const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+                const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+                message += `▼${startTime} - ${endTime}:\n${title}\n場所: ${location}\n\n`;
+            }
+            else {
+                message += `・終日: ${title}\n場所: ${location}\n\n`;
+            }
+        });
     });
-    message += '以上です。よい一日をお過ごしください✨';
+    message += '以上です。\nよい一日をお過ごしください✨';
     return message;
 };
 const getGoogleCalendarEvent = async (text) => {
@@ -172,7 +183,7 @@ const getGoogleCalendarEvent = async (text) => {
         return '西暦から日付を入力してください。';
     }
     catch (err) {
-        console.error('APIからエラーが返されました: ' + err);
+        console.error('APIからエラーが返されました: ', err);
         return '取得できませんでした。開発者にお問い合わせください。';
     }
 };
