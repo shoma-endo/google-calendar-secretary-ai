@@ -1,6 +1,6 @@
 import { openai } from '~/clients/openai.client'
 
-import { insertCalendar, updateCalendar } from '../calendars/apis'
+import { insertCalendar, updateCalendar, getEvents } from '../calendars/apis'
 import { fetchGoogleCalendarEventsForDeletion } from '../calendars/apis'
 import { deleteEventByNumber } from '../calendars/apis'
 
@@ -20,10 +20,11 @@ export const getOpenaiMessage = async (text: string): Promise<string> => {
     return await updateCalendar(text, updateJson);
   }
   else if (text.includes('取得')) {
-    const registrationJson = await fetchGoogleCalendarEventsGeneration(text);
-    if (registrationJson === null) {
+    const getEventJson = await fetchGoogleCalendarEventsGeneration(text);
+    if (getEventJson === null) {
       throw new Error('openaiResponse is null')
     }
+    return getEvents(getEventJson);
   }
   else if (text.includes('削除')) {
     // 「削除」というメッセージの場合は、イベント一覧を表示
@@ -55,10 +56,9 @@ const calendarJsonGeneration = async (text: string): Promise<string | null> => {
 }
 
 const fetchGoogleCalendarEventsGeneration = async (text: string): Promise<string | null> => {
-  const systemMessage = 'You are the text analysis assistant. Based on the string provided by the user, parse the Google Calendar event API request parameters in JSON format. Parse the date from the given string and generate the Google Calendar API fetch request parameters for that date. Interpret "tomorrow" as the day after today, "next Monday" as the upcoming Monday, and specific dates like "February 22nd" as future dates from today. Always assume the date is in the future relative to today, and the timeZone should be `Asia/Tokyo`. Based on the provided date, set the timeMin and timeMax parameters in ISO 8601 format to fetch events for the specific date through the Google Calendar API.';
   const completion = await openai.chat.completions.create({
     messages: [
-      {"role": "system", "content": systemMessage},
+      {"role": "system", "content": 'You are an assistant to fetch Google Calendar events. For the given string, parse the date and generate the Google Calendar API fetch request parameters in JSON format for that date.'},
       {"role": "user", "content": text },
     ],
     model: "gpt-3.5-turbo-1106",

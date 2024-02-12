@@ -41,20 +41,16 @@ const returnMessage = {
 } as const
 
 /**
- * Googleカレンダーから
- * 現在の日時から翌日の0時までのイベントを取得
+ * Googleカレンダーから指定された期間のイベントを取得
  **/
-export const fetchGoogleCalendarEvents = async (): Promise<string> => {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-
+export const getEvents = async (json: string): Promise<string> => {
+  const { timeMin, timeMax } = JSON.parse(json);
+  
   try {
     const res = await calendar.events.list({
       calendarId: 'primary',
-      timeMin: now.toISOString(),
-      timeMax: tomorrow.toISOString(),
+      timeMin,
+      timeMax,
       singleEvents: true,
       orderBy: 'startTime',
     });
@@ -63,10 +59,10 @@ export const fetchGoogleCalendarEvents = async (): Promise<string> => {
     if (events?.length) {
       return formatEvents(events);
     } else {
-      return '本日の予定はありません。';
+      return '指定された期間に予定はありません。';
     }
   } catch (err) {
-    console.error('APIからエラーが返されました: ' , err);
+    console.error('APIからエラーが返されました: ', err);
     return '取得できませんでした。開発者にお問い合わせください。';
   }
 };
@@ -159,8 +155,8 @@ const formatEvents = (events: Array<calendar_v3.Schema$Event>): string => {
   if (!events.length) {
     return '本日の予定は特にありません。';
   }
-
-  let message = '本日のご予定をお知らせします！\n------------------\n';
+  const eventDate = events[0].start?.dateTime ? new Date(events[0].start.dateTime) : new Date();
+  let message = `${eventDate.getFullYear()}年${eventDate.getMonth() + 1}月${eventDate.getDate()}日のご予定をお知らせします！\n------------------\n`;
   events.forEach((event) => {
     const title = event.summary;
     const location = event.location || '-';

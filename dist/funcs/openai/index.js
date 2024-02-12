@@ -21,10 +21,11 @@ const getOpenaiMessage = async (text) => {
         return await (0, apis_1.updateCalendar)(text, updateJson);
     }
     else if (text.includes('取得')) {
-        const registrationJson = await fetchGoogleCalendarEventsGeneration(text);
-        if (registrationJson === null) {
+        const getEventJson = await fetchGoogleCalendarEventsGeneration(text);
+        if (getEventJson === null) {
             throw new Error('openaiResponse is null');
         }
+        return (0, apis_1.getEvents)(getEventJson);
     }
     else if (text.includes('削除')) {
         if (text.trim() === '削除') {
@@ -53,10 +54,9 @@ const calendarJsonGeneration = async (text) => {
     return completion.choices[0].message.content;
 };
 const fetchGoogleCalendarEventsGeneration = async (text) => {
-    const systemMessage = 'You are the text analysis assistant. Based on the string provided by the user, parse the Google Calendar event API request parameters in JSON format. Parse the date from the given string and generate the Google Calendar API fetch request parameters for that date. Interpret "tomorrow" as the day after today, "next Monday" as the upcoming Monday, and specific dates like "February 22nd" as future dates from today. Always assume the date is in the future relative to today, and the timeZone should be `Asia/Tokyo`. Based on the provided date, set the timeMin and timeMax parameters in ISO 8601 format to fetch events for the specific date through the Google Calendar API.';
     const completion = await openai_client_1.openai.chat.completions.create({
         messages: [
-            { "role": "system", "content": systemMessage },
+            { "role": "system", "content": 'You are an assistant to fetch Google Calendar events. For the given string, parse the date and generate the Google Calendar API fetch request parameters in JSON format for that date.' },
             { "role": "user", "content": text },
         ],
         model: "gpt-3.5-turbo-1106",
