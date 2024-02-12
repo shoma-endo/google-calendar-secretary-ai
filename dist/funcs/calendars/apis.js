@@ -76,10 +76,10 @@ const deleteEvents = async (json) => {
                     calendarId: 'primary',
                     eventId: event.id,
                 });
-                const eventStart = event.start?.dateTime ? new Date(event.start.dateTime) : '未設定';
-                const eventEnd = event.end?.dateTime ? new Date(event.end.dateTime) : '未設定';
-                const startTime = eventStart !== '未設定' ? `${eventStart.getHours().toString().padStart(2, '0')}:${eventStart.getMinutes().toString().padStart(2, '0')}` : '未設定';
-                const endTime = eventEnd !== '未設定' ? `${eventEnd.getHours().toString().padStart(2, '0')}:${eventEnd.getMinutes().toString().padStart(2, '0')}` : '未設定';
+                const eventStart = event.start?.dateTime ? new Date(event.start.dateTime) : null;
+                const eventEnd = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+                const startTime = eventStart ? formatTime(eventStart) : '未設定';
+                const endTime = eventEnd ? formatTime(eventEnd) : '未設定';
                 deletedEventsMessage += `▼${startTime} - ${endTime}:\n${event.summary}\n場所: ${event.location || '-'}\n`;
             }
         }
@@ -117,8 +117,8 @@ const formatEvents = (events) => {
             if (event.start?.dateTime && event.end?.dateTime) {
                 const start = new Date(event.start.dateTime);
                 const end = new Date(event.end.dateTime);
-                const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
-                const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+                const startTime = formatTime(start);
+                const endTime = formatTime(end);
                 message += `▼${startTime} - ${endTime}\n${title}\n場所: ${location}\n\n`;
             }
             else {
@@ -156,4 +156,7 @@ const getGoogleCalendarEvent = async (text) => {
         console.error('APIからエラーが返されました: ', err);
         return '取得できませんでした。開発者にお問い合わせください。';
     }
+};
+const formatTime = (date) => {
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 };
