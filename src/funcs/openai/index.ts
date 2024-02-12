@@ -1,8 +1,6 @@
 import { openai } from '~/clients/openai.client'
 
-import { insertCalendar, updateCalendar, getEvents } from '../calendars/apis'
-import { fetchGoogleCalendarEventsForDeletion } from '../calendars/apis'
-import { deleteEventByNumber } from '../calendars/apis'
+import { insertCalendar, updateCalendar, getEvents, deleteEvents } from '../calendars/apis'
 
 export const getOpenaiMessage = async (text: string): Promise<string> => {
   if (text.includes('登録')) {
@@ -27,18 +25,11 @@ export const getOpenaiMessage = async (text: string): Promise<string> => {
     return getEvents(getEventJson);
   }
   else if (text.includes('削除')) {
-    // 「削除」というメッセージの場合は、イベント一覧を表示
-    if (text.trim() === '削除') {
-      return await fetchGoogleCalendarEventsForDeletion();
-    } 
-    // 「削除[イベント番号]」の場合は、指定されたイベントを削除
-    else {
-      const eventNumber = parseInt(text.replace('削除', ''));
-			if (isNaN(eventNumber)) {
-				return '有効なイベント番号を入力してください。';
-			}
-			return await deleteEventByNumber(eventNumber);
-		}
+    const deleteEventJson = await fetchGoogleCalendarEventsGeneration(text);
+    if (deleteEventJson === null) {
+      throw new Error('openaiResponse is null')
+    }
+    return deleteEvents(deleteEventJson);
   }
   return 'もう一度文章送って';
 }
