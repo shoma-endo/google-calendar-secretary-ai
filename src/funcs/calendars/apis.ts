@@ -41,7 +41,7 @@ const returnMessage = {
 } as const
 
 /**
- * Googleカレンダーから指定された期間のイベントを取得
+ * Googleカレンダーのイベント取得
  **/
 export const getEvents = async (json: string): Promise<string> => {
   const { timeMin, timeMax } = JSON.parse(json);
@@ -68,81 +68,43 @@ export const getEvents = async (json: string): Promise<string> => {
   }
 };
 
-const eventMap = new Map(); // イベント一覧
-const now = new Date(); // 現在の日付
+// 指定された期間のイベント削除
+export const deleteEvents = async (json: string): Promise<string> => {
+  const { timeMin, timeMax } = JSON.parse(json);
 
-// 「削除」というメッセージの場合は、イベント一覧を表示
-export const fetchGoogleCalendarEventsForDeletion = async (): Promise<string> => {
   try {
-    // Google Calendar APIを呼び出してイベント一覧を取得
+    // 指定された期間のイベントを取得
     const res = await calendar.events.list({
       calendarId: 'primary',
-      timeMin: now.toISOString(),
-      timeMax: (new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)).toISOString(),
+      timeMin,
+      timeMax,
       singleEvents: true,
       orderBy: 'startTime',
     });
 
     const events = res.data.items;
     if (!events || events.length === 0) {
-      return '本日の予定はありません。';
+      return '指定された期間に予定はありません。';
     }
 
-    // イベント一覧をフォーマットして返す
-    eventMap.clear();
-		let message = '本日の予定はこちらです。\n';
-		events.forEach((event, index) => {
-			// イベントの番号とIDをマップに保存
-			eventMap.set(index + 1, event.id);
-			message += `${index + 1}: ${event.summary}\n`;
-		});
-		message += '削除したい予定は、「削除1」のように指示してください。';
-    return message;
-	} catch (error) {
-    console.error(`イベントの取得中にエラーが発生しました: ${error}`);
-    return 'イベントの取得中にエラーが発生しました。';
-  }
-};
+    let deletedEventsMessage = '削除された予定:\n';
+    // 取得したイベントを削除
+    for (const event of events) {
+      if (event.id) {
+        await calendar.events.delete({
+          calendarId: 'primary',
+          eventId: event.id,
+        });
 
-// 「削除[イベント番号]」の場合は、指定されたイベントを削除
-export const deleteEventByNumber = async (eventNumber: number): Promise<string> => {
-  const eventId = eventMap.get(eventNumber);
-  if (!eventId) {
-    return '無効なイベント番号です。';
-  }
-  
-  // イベント削除処理
-  try {
-    // Google カレンダーAPIを使用してイベントを削除
-    await calendar.events.delete({
-      calendarId: 'primary',
-      eventId: eventId,
-    });
-
-    // 削除後のイベント一覧を取得
-    const res = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: now.toISOString(),
-      timeMax: (new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)).toISOString(),
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
-    
-    const events = res.data.items;
-    if (!events || events.length === 0) {
-      return '削除されました。本日の予定はありません。';
+        const eventStart = event.start?.dateTime ? new Date(event.start.dateTime) : null;
+        const eventEnd = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+        const startTime = eventStart ? formatTime(eventStart) : '未設定';
+        const endTime = eventEnd ? formatTime(eventEnd) : '未設定';
+        deletedEventsMessage += `▼${startTime} - ${endTime}:\n${event.summary}\n場所: ${event.location || '-'}\n`;
+      }
     }
-    
-    // イベント一覧をフォーマットして返す
-    eventMap.clear();
-    let message = '削除されました。\n本日の予定はこちらです。\n';
-    events.forEach((event, index) => {
-      // イベントの番号とIDをマップに保存
-      eventMap.set(index + 1, event.id);
-      message += `${index + 1}: ${event.summary}\n`;
-    });
-    message += '他に削除したい予定があれば、「削除1」のように指示してください。';
-    return message;
+
+    return `${events.length}件の予定を削除しました。\n${deletedEventsMessage}`;
   } catch (error) {
     console.error(`イベントの削除中にエラーが発生しました: ${error}`);
     return 'イベントの削除中にエラーが発生しました。';
@@ -182,10 +144,10 @@ const formatEvents = (events: Array<calendar_v3.Schema$Event>): string => {
       if (event.start?.dateTime && event.end?.dateTime) {
         const start = new Date(event.start.dateTime);
         const end = new Date(event.end.dateTime);
-        const startTime = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
-        const endTime = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+        const startTime = formatTime(start);
+        const endTime = formatTime(end);
 
-        message += `▼${startTime} - ${endTime}:\n${title}\n場所: ${location}\n\n`;
+        message += `▼${startTime} - ${endTime}\n${title}\n場所: ${location}\n\n`;
       } else {
         message += `・終日: ${title}\n場所: ${location}\n\n`;
       }
@@ -228,4 +190,8 @@ const getGoogleCalendarEvent = async (text: string): Promise<calendar_v3.Schema$
     console.error('APIからエラーが返されました: ', err);
     return '取得できませんでした。開発者にお問い合わせください。';
   }
+};
+
+const formatTime = (date: Date): string => {
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 };
