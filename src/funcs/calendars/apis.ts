@@ -1,4 +1,5 @@
 import { calendar_v3,google } from 'googleapis';
+import moment from 'moment-timezone'; // moment-timezoneパッケージを追加
 
 import { oauth2Client } from '../calendars';
 
@@ -193,5 +194,5 @@ const getGoogleCalendarEvent = async (text: string): Promise<calendar_v3.Schema$
 };
 
 const formatTime = (date: Date): string => {
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  return moment(date).tz('Asia/Tokyo').format('HH:mm');
 };
