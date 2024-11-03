@@ -57,7 +57,7 @@ export const getEvents = async (json: string): Promise<string> => {
     });
 
     const events = res.data.items;
-    console.log('取得したイベント:', events);
+
     if (events?.length) {
       return formatEvents(events);
     } else {

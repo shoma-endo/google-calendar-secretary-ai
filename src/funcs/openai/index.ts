@@ -1,6 +1,6 @@
-import { openai } from '~/clients/openai.client'
+import { openai } from '~/clients/openai.client';
 
-import { insertCalendar, updateCalendar, getEvents, deleteEvents } from '../calendars/apis'
+import { deleteEvents, getEvents, insertCalendar, updateCalendar } from '../calendars/apis';
 
 export const getOpenaiMessage = async (text: string): Promise<string> => {
   if (text.includes('登録')) {
