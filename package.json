@@ -21,7 +21,7 @@
     "googleapis": "^128.0.0",
     "module-alias": "^2.2.3",
     "moment-timezone": "^0.5.45",
-    "openai": "^4.20.0"
+    "openai": "^4.70.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
